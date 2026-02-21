@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Period Tracker</title>
+    <title>SheOva - Your Cycle Companion</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,85 +12,132 @@
         <div class="floating-shape shape-2"></div>
         <div class="floating-shape shape-3"></div>
         <div class="floating-shape shape-4"></div>
+        <div class="mist-layer"></div>
         <div class="particles" id="particles"></div>
-        <div class="wave"></div>
+        <canvas id="waveCanvas"></canvas>
     </div>
     
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div>
-                    <h1>SheOva</h1>
-                    <p class="subtitle">Your personal cycle companion</p>
+    <!-- Hero Section -->
+    <section class="hero-section section" data-scroll>
+        <div class="container-fluid">
+            <header>
+                <div class="header-content">
+                    <div>
+                        <h1>SheOva</h1>
+                        <p class="subtitle">Your gentle cycle companion</p>
+                    </div>
+                    <div class="dark-mode-toggle" id="darkModeToggle"></div>
                 </div>
-                <div class="dark-mode-toggle" id="darkModeToggle"></div>
-            </div>
-        </header>
+            </header>
 
-        <div class="daily-message" id="dailyMessage">
-            <div class="message-icon">✨</div>
-            <div class="message-text">
-                <div class="message-title">Today's Affirmation</div>
-                <div class="message-content">You are strong, capable, and in tune with your body.</div>
+            <div class="daily-message" id="dailyMessage">
+                <div class="message-icon">✨</div>
+                <div class="message-text">
+                    <div class="message-title">Today's Affirmation</div>
+                    <div class="message-content">You are strong, capable, and in tune with your body.</div>
+                </div>
+            </div>
+
+            <div class="cycle-overview">
+                <div class="cycle-visual">
+                    <svg class="cycle-progress" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="progress-ring-bg" cx="100" cy="100" r="85" />
+                        <circle class="progress-ring-fill" cx="100" cy="100" r="85" id="progressCircle" />
+                        <text x="100" y="95" class="progress-day" id="progressDay">Day 1</text>
+                        <text x="100" y="115" class="progress-phase" id="progressPhase">Menstrual</text>
+                    </svg>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">Current Day</span>
+                        <span class="stat-value" id="currentDay">-</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Next Period</span>
+                        <span class="stat-value" id="nextPeriod">-</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Avg Cycle</span>
+                        <span class="stat-value" id="avgCycle">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mood-indicator" id="moodIndicator">
+                <span class="mood-emoji">🌸</span>
+                <div class="mood-text">Welcome</div>
+                <div class="mood-description">Log your first period to get started</div>
             </div>
         </div>
+    </section>
 
-        <div class="mood-indicator" id="moodIndicator">
-            <span class="mood-emoji">🌸</span>
-            <div class="mood-text">Welcome</div>
-            <div class="mood-description">Log your first period to get started</div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-label">Current Day</span>
-                <span class="stat-value" id="currentDay">-</span>
+    <!-- Calendar Section -->
+    <section class="calendar-section section" data-scroll>
+        <div class="container-fluid">
+            <div class="section-header">
+                <h2>Your Cycle Calendar</h2>
+                <p class="section-subtitle">Track your journey, day by day</p>
             </div>
-            <div class="stat-card">
-                <span class="stat-label">Next Period</span>
-                <span class="stat-value" id="nextPeriod">-</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Avg Cycle</span>
-                <span class="stat-value" id="avgCycle">-</span>
-            </div>
-        </div>
-
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <button id="prevMonth" class="nav-btn">←</button>
-                <h2 id="monthYear"></h2>
-                <button id="nextMonth" class="nav-btn">→</button>
-            </div>
-            <div class="calendar" id="calendar"></div>
             
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: linear-gradient(135deg, #ff6b9d, #ff8fab);"></div>
-                    <span>Period Days</span>
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button id="prevMonth" class="nav-btn">←</button>
+                    <h3 id="monthYear"></h3>
+                    <button id="nextMonth" class="nav-btn">→</button>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: linear-gradient(135deg, #ffd6e7, #ffe6f0);"></div>
-                    <span>Predicted Period</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: linear-gradient(135deg, #6bcf7f, #95e1a5);"></div>
-                    <span>Fertile Window</span>
+                <div class="calendar" id="calendar"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color period-color"></div>
+                        <span>Period Days</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color predicted-color"></div>
+                        <span>Predicted</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color fertile-color"></div>
+                        <span>Fertile Window</span>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="actions">
-            <button id="logPeriodBtn" class="btn btn-primary">Log Period Start</button>
-            <button id="viewHistoryBtn" class="btn btn-secondary">View History</button>
-            <button id="settingsBtn" class="btn btn-secondary">Settings</button>
-        </div>
-
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div id="modalBody"></div>
+    <!-- Actions Section -->
+    <section class="actions-section section" data-scroll>
+        <div class="container-fluid">
+            <div class="section-header">
+                <h2>Manage Your Cycle</h2>
+                <p class="section-subtitle">Simple tools for tracking</p>
             </div>
+            
+            <div class="actions">
+                <button id="logPeriodBtn" class="btn btn-primary">Log Period Start</button>
+                <button id="viewHistoryBtn" class="btn btn-secondary">View History</button>
+                <button id="settingsBtn" class="btn btn-secondary">Settings</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Made with care for your wellbeing</p>
+    </footer>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
         </div>
     </div>
 

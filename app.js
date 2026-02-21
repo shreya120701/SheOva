@@ -18,18 +18,18 @@ class PeriodTracker {
 
     initBackground() {
         const particlesContainer = document.getElementById('particles');
-        const particleCount = 40;
-        const flowerEmojis = ['🌸', '🌺', '🌼', '🌻', '🌷', '🏵️', '💐'];
+        const particleCount = 50;
+        const flowerEmojis = ['🌸', '🌺', '🌼', '🌻', '🌷', '🏵️', '💐', '🌹'];
         
         // Create particles
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 18 + 's';
-            particle.style.animationDuration = (18 + Math.random() * 12) + 's';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (20 + Math.random() * 15) + 's';
             
-            const size = Math.random() * 3 + 2;
+            const size = Math.random() * 2 + 1.5;
             particle.style.width = size + 'px';
             particle.style.height = size + 'px';
             
@@ -37,31 +37,34 @@ class PeriodTracker {
         }
         
         // Create floating flowers
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 10; i++) {
             const flower = document.createElement('div');
             flower.className = 'flower';
             flower.textContent = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
             flower.style.left = Math.random() * 100 + '%';
-            flower.style.animationDelay = Math.random() * 20 + 's';
-            flower.style.animationDuration = (20 + Math.random() * 15) + 's';
-            flower.style.fontSize = (20 + Math.random() * 16) + 'px';
+            flower.style.animationDelay = Math.random() * 25 + 's';
+            flower.style.animationDuration = (25 + Math.random() * 20) + 's';
+            flower.style.fontSize = (18 + Math.random() * 14) + 'px';
             
             particlesContainer.appendChild(flower);
         }
         
-        // Mouse parallax effect
-        document.addEventListener('mousemove', (e) => {
+        // Wave canvas animation
+        this.initWaveCanvas();
+        
+        // Scroll-based parallax
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
             const shapes = document.querySelectorAll('.floating-shape');
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
             
             shapes.forEach((shape, index) => {
-                const speed = (index + 1) * 15;
-                const x = (mouseX - 0.5) * speed;
-                const y = (mouseY - 0.5) * speed;
-                shape.style.transform = `translate(${x}px, ${y}px)`;
+                const speed = (index + 1) * 0.05;
+                shape.style.transform = `translateY(${scrolled * speed}px)`;
             });
         });
+        
+        // Scroll reveal animations
+        this.initScrollReveal();
         
         // Dark mode toggle
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -78,6 +81,68 @@ class PeriodTracker {
         
         // Update daily message
         this.updateDailyMessage();
+    }
+    
+    initWaveCanvas() {
+        const canvas = document.getElementById('waveCanvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = 200;
+        
+        let offset = 0;
+        
+        const drawWave = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            
+            for (let x = 0; x < canvas.width; x++) {
+                const y = Math.sin((x + offset) * 0.01) * 30 + canvas.height / 2;
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(255, 182, 193, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 182, 193, 0.05)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            offset += 0.5;
+            requestAnimationFrame(drawWave);
+        };
+        
+        drawWave();
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+        });
+    }
+    
+    initScrollReveal() {
+        const sections = document.querySelectorAll('.section[data-scroll]');
+        
+        const revealSection = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        };
+        
+        const sectionObserver = new IntersectionObserver(revealSection, {
+            root: null,
+            threshold: 0.15
+        });
+        
+        sections.forEach(section => {
+            sectionObserver.observe(section);
+        });
     }
     
     updateDailyMessage() {
@@ -260,11 +325,17 @@ class PeriodTracker {
         const currentDayEl = document.getElementById('currentDay');
         const nextPeriodEl = document.getElementById('nextPeriod');
         const avgCycleEl = document.getElementById('avgCycle');
+        const progressDay = document.getElementById('progressDay');
+        const progressPhase = document.getElementById('progressPhase');
+        const progressCircle = document.getElementById('progressCircle');
 
         if (this.periods.length === 0) {
             currentDayEl.textContent = '-';
             nextPeriodEl.textContent = '-';
             avgCycleEl.textContent = '-';
+            if (progressDay) progressDay.textContent = 'Day -';
+            if (progressPhase) progressPhase.textContent = 'Start tracking';
+            if (progressCircle) progressCircle.style.strokeDashoffset = 534;
             return;
         }
 
@@ -278,7 +349,6 @@ class PeriodTracker {
         const cards = document.querySelectorAll('.stat-card');
         cards.forEach(card => {
             card.className = 'stat-card';
-            card.classList.add(phase);
         });
 
         const avgCycle = this.getAverageCycle();
@@ -288,6 +358,24 @@ class PeriodTracker {
         
         nextPeriodEl.textContent = daysUntil > 0 ? `${daysUntil} days` : 'Soon';
         avgCycleEl.textContent = `${avgCycle} days`;
+        
+        // Update progress circle
+        if (progressDay) progressDay.textContent = `Day ${daysSinceStart}`;
+        if (progressPhase) {
+            const phaseNames = {
+                menstrual: 'Menstrual',
+                follicular: 'Follicular',
+                ovulation: 'Ovulation',
+                luteal: 'Luteal'
+            };
+            progressPhase.textContent = phaseNames[phase];
+        }
+        
+        if (progressCircle) {
+            const circumference = 534;
+            const progress = (daysSinceStart / avgCycle) * circumference;
+            progressCircle.style.strokeDashoffset = circumference - progress;
+        }
     }
 
     getCurrentPhase() {
