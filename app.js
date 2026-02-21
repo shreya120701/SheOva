@@ -1,0 +1,385 @@
+class PeriodTracker {
+    constructor() {
+        this.currentDate = new Date();
+        this.periods = this.loadData();
+        this.settings = this.loadSettings();
+        this.init();
+    }
+
+    init() {
+        this.renderCalendar();
+        this.updateStats();
+        this.setupEventListeners();
+        this.checkReminders();
+    }
+
+    loadData() {
+        const data = localStorage.getItem('periodData');
+        return data ? JSON.parse(data) : [];
+    }
+
+    saveData() {
+        localStorage.setItem('periodData', JSON.stringify(this.periods));
+    }
+
+    loadSettings() {
+        const settings = localStorage.getItem('periodSettings');
+        return settings ? JSON.parse(settings) : {
+            cycleLength: 28,
+            periodLength: 5,
+            reminders: true
+        };
+    }
+
+    saveSettings() {
+        localStorage.setItem('periodSettings', JSON.stringify(this.settings));
+    }
+
+    renderCalendar() {
+        const calendar = document.getElementById('calendar');
+        const monthYear = document.getElementById('monthYear');
+        
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        
+        monthYear.textContent = new Date(year, month).toLocaleDateString('en-US', { 
+            month: 'long', 
+            year: 'numeric' 
+        });
+
+        calendar.innerHTML = '';
+        
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayHeaders.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'day-header';
+            header.textContent = day;
+            calendar.appendChild(header);
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        for (let i = firstDay - 1; i >= 0; i--) {
+            this.createDayCell(calendar, daysInPrevMonth - i, true, year, month - 1);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            this.createDayCell(calendar, day, false, year, month);
+        }
+
+        const remainingCells = 42 - (firstDay + daysInMonth);
+        for (let day = 1; day <= remainingCells; day++) {
+            this.createDayCell(calendar, day, true, year, month + 1);
+        }
+    }
+
+    createDayCell(calendar, day, isOtherMonth, year, month) {
+        const cell = document.createElement('div');
+        cell.className = 'day';
+        cell.textContent = day;
+        
+        if (isOtherMonth) {
+            cell.classList.add('other-month');
+        }
+
+        const cellDate = new Date(year, month, day);
+        const today = new Date();
+        
+        if (cellDate.toDateString() === today.toDateString()) {
+            cell.classList.add('today');
+        }
+
+        const dateStr = cellDate.toISOString().split('T')[0];
+        
+        if (this.isPeriodDay(dateStr)) {
+            cell.classList.add('period');
+        } else if (this.isPredictedPeriod(dateStr)) {
+            cell.classList.add('predicted');
+        } else if (this.isFertileWindow(dateStr)) {
+            cell.classList.add('fertile');
+        }
+
+        cell.addEventListener('click', () => this.handleDayClick(dateStr));
+        calendar.appendChild(cell);
+    }
+
+    isPeriodDay(dateStr) {
+        return this.periods.some(period => {
+            const start = new Date(period.start);
+            const end = new Date(start);
+            end.setDate(end.getDate() + (period.length || this.settings.periodLength));
+            const check = new Date(dateStr);
+            return check >= start && check < end;
+        });
+    }
+
+    isPredictedPeriod(dateStr) {
+        if (this.periods.length === 0) return false;
+        
+        const lastPeriod = new Date(this.periods[this.periods.length - 1].start);
+        const predicted = new Date(lastPeriod);
+        predicted.setDate(predicted.getDate() + this.getAverageCycle());
+        
+        const check = new Date(dateStr);
+        const predictedEnd = new Date(predicted);
+        predictedEnd.setDate(predictedEnd.getDate() + this.settings.periodLength);
+        
+        return check >= predicted && check < predictedEnd;
+    }
+
+    isFertileWindow(dateStr) {
+        if (this.periods.length === 0) return false;
+        
+        const lastPeriod = new Date(this.periods[this.periods.length - 1].start);
+        const ovulation = new Date(lastPeriod);
+        ovulation.setDate(ovulation.getDate() + this.getAverageCycle() - 14);
+        
+        const fertileStart = new Date(ovulation);
+        fertileStart.setDate(fertileStart.getDate() - 5);
+        const fertileEnd = new Date(ovulation);
+        fertileEnd.setDate(fertileEnd.getDate() + 1);
+        
+        const check = new Date(dateStr);
+        return check >= fertileStart && check <= fertileEnd;
+    }
+
+    getAverageCycle() {
+        if (this.periods.length < 2) return this.settings.cycleLength;
+        
+        let total = 0;
+        for (let i = 1; i < this.periods.length; i++) {
+            const prev = new Date(this.periods[i - 1].start);
+            const curr = new Date(this.periods[i].start);
+            const diff = Math.floor((curr - prev) / (1000 * 60 * 60 * 24));
+            total += diff;
+        }
+        
+        return Math.round(total / (this.periods.length - 1));
+    }
+
+    updateStats() {
+        const currentDayEl = document.getElementById('currentDay');
+        const nextPeriodEl = document.getElementById('nextPeriod');
+        const avgCycleEl = document.getElementById('avgCycle');
+
+        if (this.periods.length === 0) {
+            currentDayEl.textContent = '-';
+            nextPeriodEl.textContent = '-';
+            avgCycleEl.textContent = '-';
+            return;
+        }
+
+        const lastPeriod = new Date(this.periods[this.periods.length - 1].start);
+        const today = new Date();
+        const daysSinceStart = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24)) + 1;
+        
+        currentDayEl.textContent = `Day ${daysSinceStart}`;
+
+        const avgCycle = this.getAverageCycle();
+        const nextPeriod = new Date(lastPeriod);
+        nextPeriod.setDate(nextPeriod.getDate() + avgCycle);
+        const daysUntil = Math.floor((nextPeriod - today) / (1000 * 60 * 60 * 24));
+        
+        nextPeriodEl.textContent = daysUntil > 0 ? `${daysUntil} days` : 'Soon';
+        avgCycleEl.textContent = `${avgCycle} days`;
+    }
+
+    handleDayClick(dateStr) {
+        if (this.isPeriodDay(dateStr)) {
+            if (confirm('Remove this period day?')) {
+                this.removePeriodDay(dateStr);
+            }
+        } else {
+            if (confirm('Log period start on this day?')) {
+                this.logPeriod(dateStr);
+            }
+        }
+    }
+
+    logPeriod(dateStr = null) {
+        const date = dateStr || new Date().toISOString().split('T')[0];
+        this.periods.push({
+            start: date,
+            length: this.settings.periodLength
+        });
+        this.periods.sort((a, b) => new Date(a.start) - new Date(b.start));
+        this.saveData();
+        this.renderCalendar();
+        this.updateStats();
+    }
+
+    removePeriodDay(dateStr) {
+        this.periods = this.periods.filter(period => {
+            const start = new Date(period.start);
+            const end = new Date(start);
+            end.setDate(end.getDate() + period.length);
+            const check = new Date(dateStr);
+            return !(check >= start && check < end);
+        });
+        this.saveData();
+        this.renderCalendar();
+        this.updateStats();
+    }
+
+    setupEventListeners() {
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            this.renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            this.renderCalendar();
+        });
+
+        document.getElementById('logPeriodBtn').addEventListener('click', () => {
+            this.showLogPeriodModal();
+        });
+
+        document.getElementById('viewHistoryBtn').addEventListener('click', () => {
+            this.showHistoryModal();
+        });
+
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            this.showSettingsModal();
+        });
+
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    showLogPeriodModal() {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalBody.innerHTML = `
+            <h2>Log Period</h2>
+            <div class="form-group">
+                <label>Start Date:</label>
+                <input type="date" id="periodDate" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <button class="btn btn-primary" id="savePeriod">Save</button>
+        `;
+        
+        modal.style.display = 'block';
+        
+        document.getElementById('savePeriod').addEventListener('click', () => {
+            const date = document.getElementById('periodDate').value;
+            this.logPeriod(date);
+            modal.style.display = 'none';
+        });
+    }
+
+    showHistoryModal() {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modalBody');
+        
+        let historyHTML = '<h2>Period History</h2><div class="history-list">';
+        
+        if (this.periods.length === 0) {
+            historyHTML += '<p>No periods logged yet.</p>';
+        } else {
+            this.periods.slice().reverse().forEach((period, index) => {
+                const realIndex = this.periods.length - 1 - index;
+                historyHTML += `
+                    <div class="history-item">
+                        <span>${new Date(period.start).toLocaleDateString()}</span>
+                        <button class="delete-btn" data-index="${realIndex}">Delete</button>
+                    </div>
+                `;
+            });
+        }
+        
+        historyHTML += '</div>';
+        modalBody.innerHTML = historyHTML;
+        modal.style.display = 'block';
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                this.periods.splice(index, 1);
+                this.saveData();
+                this.renderCalendar();
+                this.updateStats();
+                this.showHistoryModal();
+            });
+        });
+    }
+
+    showSettingsModal() {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalBody.innerHTML = `
+            <h2>Settings</h2>
+            <div class="form-group">
+                <label>Average Cycle Length (days):</label>
+                <input type="number" id="cycleLength" value="${this.settings.cycleLength}" min="21" max="35">
+            </div>
+            <div class="form-group">
+                <label>Period Length (days):</label>
+                <input type="number" id="periodLength" value="${this.settings.periodLength}" min="3" max="7">
+            </div>
+            <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b9d;"></div>
+                    <span>Period Days</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffd6e7;"></div>
+                    <span>Predicted Period</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #c7f0db;"></div>
+                    <span>Fertile Window</span>
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+        
+        document.getElementById('saveSettings').addEventListener('click', () => {
+            this.settings.cycleLength = parseInt(document.getElementById('cycleLength').value);
+            this.settings.periodLength = parseInt(document.getElementById('periodLength').value);
+            this.saveSettings();
+            this.renderCalendar();
+            this.updateStats();
+            modal.style.display = 'none';
+        });
+    }
+
+    checkReminders() {
+        if (!this.settings.reminders || this.periods.length === 0) return;
+        
+        const lastPeriod = new Date(this.periods[this.periods.length - 1].start);
+        const today = new Date();
+        const avgCycle = this.getAverageCycle();
+        const nextPeriod = new Date(lastPeriod);
+        nextPeriod.setDate(nextPeriod.getDate() + avgCycle);
+        const daysUntil = Math.floor((nextPeriod - today) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntil === 3 && Notification.permission === 'granted') {
+            new Notification('Period Tracker', {
+                body: 'Your period is expected in 3 days',
+                icon: '🌸'
+            });
+        }
+        
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+}
+
+const tracker = new PeriodTracker();

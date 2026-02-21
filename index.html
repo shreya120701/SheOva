@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Period Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌸 Period Tracker</h1>
+            <p class="subtitle">Track your cycle, predict your next period</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Current Day</span>
+                <span class="stat-value" id="currentDay">-</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Next Period</span>
+                <span class="stat-value" id="nextPeriod">-</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Avg Cycle</span>
+                <span class="stat-value" id="avgCycle">-</span>
+            </div>
+        </div>
+
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <button id="prevMonth" class="nav-btn">←</button>
+                <h2 id="monthYear"></h2>
+                <button id="nextMonth" class="nav-btn">→</button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+        </div>
+
+        <div class="actions">
+            <button id="logPeriodBtn" class="btn btn-primary">Log Period Start</button>
+            <button id="viewHistoryBtn" class="btn btn-secondary">View History</button>
+            <button id="settingsBtn" class="btn btn-secondary">Settings</button>
+        </div>
+
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
