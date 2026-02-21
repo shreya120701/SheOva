@@ -3,144 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SheOva - Your Cycle Companion</title>
+    <title>SheOva - Immersive Cycle Journey</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="background-3d">
-        <div class="floating-shape shape-1"></div>
-        <div class="floating-shape shape-2"></div>
-        <div class="floating-shape shape-3"></div>
-        <div class="floating-shape shape-4"></div>
-        <div class="mist-layer"></div>
-        <div class="particles" id="particles"></div>
-        <canvas id="waveCanvas"></canvas>
-    </div>
+    <!-- 3D Canvas -->
+    <canvas id="webgl-canvas"></canvas>
     
-    <!-- Hero Section -->
-    <section class="hero-section section" data-scroll>
-        <div class="container-fluid">
-            <header>
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+    
+    <!-- Content Sections -->
+    <div class="scroll-container">
+        
+        <!-- Section 1: Hero -->
+        <section class="section hero-section" data-section="0">
+            <div class="glass-card hero-card">
                 <div class="header-content">
-                    <div>
-                        <h1>SheOva</h1>
-                        <p class="subtitle">Your gentle cycle companion</p>
-                    </div>
-                    <div class="dark-mode-toggle" id="darkModeToggle"></div>
+                    <h1 class="title-3d">SheOva</h1>
+                    <p class="subtitle-glow">Your Immersive Cycle Universe</p>
                 </div>
-            </header>
-
-            <div class="daily-message" id="dailyMessage">
-                <div class="message-icon">✨</div>
-                <div class="message-text">
-                    <div class="message-title">Today's Affirmation</div>
-                    <div class="message-content">You are strong, capable, and in tune with your body.</div>
-                </div>
-            </div>
-
-            <div class="cycle-overview">
-                <div class="cycle-visual">
-                    <svg class="cycle-progress" viewBox="0 0 200 200">
-                        <defs>
-                            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <circle class="progress-ring-bg" cx="100" cy="100" r="85" />
-                        <circle class="progress-ring-fill" cx="100" cy="100" r="85" id="progressCircle" />
-                        <text x="100" y="95" class="progress-day" id="progressDay">Day 1</text>
-                        <text x="100" y="115" class="progress-phase" id="progressPhase">Menstrual</text>
-                    </svg>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-label">Current Day</span>
-                        <span class="stat-value" id="currentDay">-</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Next Period</span>
-                        <span class="stat-value" id="nextPeriod">-</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Avg Cycle</span>
-                        <span class="stat-value" id="avgCycle">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mood-indicator" id="moodIndicator">
-                <span class="mood-emoji">🌸</span>
-                <div class="mood-text">Welcome</div>
-                <div class="mood-description">Log your first period to get started</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Calendar Section -->
-    <section class="calendar-section section" data-scroll>
-        <div class="container-fluid">
-            <div class="section-header">
-                <h2>Your Cycle Calendar</h2>
-                <p class="section-subtitle">Track your journey, day by day</p>
+                <button class="dark-mode-toggle-3d" id="darkModeToggle">
+                    <span class="toggle-icon">☀️</span>
+                </button>
             </div>
             
-            <div class="calendar-wrapper">
-                <div class="calendar-header">
-                    <button id="prevMonth" class="nav-btn">←</button>
-                    <h3 id="monthYear"></h3>
-                    <button id="nextMonth" class="nav-btn">→</button>
+            <div class="glass-card message-card">
+                <div class="message-icon-3d" id="messageIcon">✨</div>
+                <div class="message-content">
+                    <div class="message-title">Today's Affirmation</div>
+                    <div class="message-text" id="messageText">You are strong, capable, and in tune with your body.</div>
                 </div>
-                <div class="calendar" id="calendar"></div>
+            </div>
+        </section>
+        
+        <!-- Section 2: Cycle Overview -->
+        <section class="section cycle-section" data-section="1">
+            <div class="glass-card cycle-card">
+                <h2 class="section-title">Your Cycle Journey</h2>
                 
-                <div class="legend">
+                <div class="cycle-ring-container">
+                    <div class="cycle-ring-3d" id="cycleRing">
+                        <div class="ring-center">
+                            <div class="ring-day" id="ringDay">Day 1</div>
+                            <div class="ring-phase" id="ringPhase">Menstrual</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-3d">
+                    <div class="stat-orb">
+                        <div class="stat-label">Current Day</div>
+                        <div class="stat-value" id="currentDay">-</div>
+                    </div>
+                    <div class="stat-orb">
+                        <div class="stat-label">Next Period</div>
+                        <div class="stat-value" id="nextPeriod">-</div>
+                    </div>
+                    <div class="stat-orb">
+                        <div class="stat-label">Avg Cycle</div>
+                        <div class="stat-value" id="avgCycle">-</div>
+                    </div>
+                </div>
+                
+                <div class="mood-3d" id="moodIndicator">
+                    <div class="mood-emoji-3d">🌸</div>
+                    <div class="mood-text">Welcome</div>
+                    <div class="mood-desc">Log your first period to begin</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: Calendar -->
+        <section class="section calendar-section" data-section="2">
+            <div class="glass-card calendar-card">
+                <h2 class="section-title">Holographic Calendar</h2>
+                
+                <div class="calendar-controls">
+                    <button class="nav-orb" id="prevMonth">←</button>
+                    <h3 class="month-title" id="monthYear"></h3>
+                    <button class="nav-orb" id="nextMonth">→</button>
+                </div>
+                
+                <div class="calendar-hologram" id="calendar"></div>
+                
+                <div class="legend-3d">
                     <div class="legend-item">
-                        <div class="legend-color period-color"></div>
-                        <span>Period Days</span>
+                        <div class="legend-orb period-orb"></div>
+                        <span>Period</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color predicted-color"></div>
+                        <div class="legend-orb predicted-orb"></div>
                         <span>Predicted</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color fertile-color"></div>
-                        <span>Fertile Window</span>
+                        <div class="legend-orb fertile-orb"></div>
+                        <span>Fertile</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Actions Section -->
-    <section class="actions-section section" data-scroll>
-        <div class="container-fluid">
-            <div class="section-header">
-                <h2>Manage Your Cycle</h2>
-                <p class="section-subtitle">Simple tools for tracking</p>
+        </section>
+        
+        <!-- Section 4: Actions -->
+        <section class="section actions-section" data-section="3">
+            <div class="glass-card actions-card">
+                <h2 class="section-title">Manage Your Journey</h2>
+                
+                <div class="action-orbs">
+                    <button class="action-orb primary-orb" id="logPeriodBtn">
+                        <span class="orb-icon">+</span>
+                        <span class="orb-text">Log Period</span>
+                    </button>
+                    <button class="action-orb secondary-orb" id="viewHistoryBtn">
+                        <span class="orb-icon">📊</span>
+                        <span class="orb-text">History</span>
+                    </button>
+                    <button class="action-orb secondary-orb" id="settingsBtn">
+                        <span class="orb-icon">⚙️</span>
+                        <span class="orb-text">Settings</span>
+                    </button>
+                </div>
             </div>
-            
-            <div class="actions">
-                <button id="logPeriodBtn" class="btn btn-primary">Log Period Start</button>
-                <button id="viewHistoryBtn" class="btn btn-secondary">View History</button>
-                <button id="settingsBtn" class="btn btn-secondary">Settings</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Made with care for your wellbeing</p>
-    </footer>
-
+        </section>
+        
+    </div>
+    
     <!-- Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
+    <div id="modal" class="modal-3d">
+        <div class="modal-glass">
+            <button class="modal-close" id="modalClose">×</button>
             <div id="modalBody"></div>
         </div>
     </div>
-
+    
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-orb"></div>
+        <p>Entering your wellness universe...</p>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
