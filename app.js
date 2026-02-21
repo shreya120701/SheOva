@@ -347,19 +347,88 @@ class PeriodTracker {
         const modal = document.getElementById('modal');
         const modalBody = document.getElementById('modalBody');
         
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+        const currentDay = today.getDate();
+        
+        // Generate year options (current year and 5 years back)
+        let yearOptions = '';
+        for (let y = currentYear; y >= currentYear - 5; y--) {
+            yearOptions += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+        }
+        
+        // Generate month options
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        let monthOptions = '';
+        months.forEach((month, index) => {
+            monthOptions += `<option value="${index}" ${index === currentMonth ? 'selected' : ''}>${month}</option>`;
+        });
+        
+        // Generate day options
+        let dayOptions = '';
+        for (let d = 1; d <= 31; d++) {
+            dayOptions += `<option value="${d}" ${d === currentDay ? 'selected' : ''}>${d}</option>`;
+        }
+        
         modalBody.innerHTML = `
-            <h2>Log Period</h2>
+            <h2>Log Period Start</h2>
             <div class="form-group">
-                <label>Start Date:</label>
-                <input type="date" id="periodDate" value="${new Date().toISOString().split('T')[0]}">
+                <label>Select Date:</label>
+                <div class="date-dropdowns">
+                    <select id="periodMonth" class="date-select">
+                        ${monthOptions}
+                    </select>
+                    <select id="periodDay" class="date-select">
+                        ${dayOptions}
+                    </select>
+                    <select id="periodYear" class="date-select">
+                        ${yearOptions}
+                    </select>
+                </div>
             </div>
-            <button class="btn btn-primary" id="savePeriod">Save</button>
+            <button class="btn btn-primary" id="savePeriod">Save Period</button>
         `;
         
         modal.style.display = 'block';
         
+        // Update days when month/year changes
+        const monthSelect = document.getElementById('periodMonth');
+        const yearSelect = document.getElementById('periodYear');
+        const daySelect = document.getElementById('periodDay');
+        
+        const updateDays = () => {
+            const month = parseInt(monthSelect.value);
+            const year = parseInt(yearSelect.value);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const currentDay = parseInt(daySelect.value);
+            
+            daySelect.innerHTML = '';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d;
+                if (d === currentDay && d <= daysInMonth) {
+                    option.selected = true;
+                }
+                daySelect.appendChild(option);
+            }
+            
+            // If current day is greater than days in month, select last day
+            if (currentDay > daysInMonth) {
+                daySelect.value = daysInMonth;
+            }
+        };
+        
+        monthSelect.addEventListener('change', updateDays);
+        yearSelect.addEventListener('change', updateDays);
+        
         document.getElementById('savePeriod').addEventListener('click', () => {
-            const date = document.getElementById('periodDate').value;
+            const year = document.getElementById('periodYear').value;
+            const month = String(parseInt(document.getElementById('periodMonth').value) + 1).padStart(2, '0');
+            const day = String(document.getElementById('periodDay').value).padStart(2, '0');
+            const date = `${year}-${month}-${day}`;
             this.logPeriod(date);
             modal.style.display = 'none';
         });
