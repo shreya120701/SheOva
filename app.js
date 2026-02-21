@@ -401,22 +401,54 @@ class PeriodTracker {
             menstrual: {
                 emoji: '🌙',
                 text: 'Rest & Restore',
-                description: 'Take it easy, practice self-care'
+                description: 'Take it easy, practice self-care',
+                foods: [
+                    { emoji: '🍫', name: 'Dark Chocolate', benefit: 'Boosts mood' },
+                    { emoji: '🥬', name: 'Leafy Greens', benefit: 'Iron-rich' },
+                    { emoji: '🍌', name: 'Bananas', benefit: 'Reduces cramps' },
+                    { emoji: '🥜', name: 'Nuts & Seeds', benefit: 'Magnesium' },
+                    { emoji: '🫐', name: 'Berries', benefit: 'Antioxidants' },
+                    { emoji: '🍵', name: 'Ginger Tea', benefit: 'Anti-inflammatory' }
+                ]
             },
             follicular: {
                 emoji: '🌸',
                 text: 'Energized & Creative',
-                description: 'Great time for new projects'
+                description: 'Great time for new projects',
+                foods: [
+                    { emoji: '🥑', name: 'Avocado', benefit: 'Healthy fats' },
+                    { emoji: '🥚', name: 'Eggs', benefit: 'Protein boost' },
+                    { emoji: '🥗', name: 'Fresh Salads', benefit: 'Light & energizing' },
+                    { emoji: '🍊', name: 'Citrus Fruits', benefit: 'Vitamin C' },
+                    { emoji: '🌰', name: 'Almonds', benefit: 'Energy' },
+                    { emoji: '🥦', name: 'Broccoli', benefit: 'Fiber-rich' }
+                ]
             },
             ovulation: {
                 emoji: '✨',
                 text: 'Peak Energy',
-                description: 'You\'re at your strongest'
+                description: 'You\'re at your strongest',
+                foods: [
+                    { emoji: '🐟', name: 'Salmon', benefit: 'Omega-3' },
+                    { emoji: '🍓', name: 'Strawberries', benefit: 'Antioxidants' },
+                    { emoji: '🥒', name: 'Cucumber', benefit: 'Hydrating' },
+                    { emoji: '🍉', name: 'Watermelon', benefit: 'Refreshing' },
+                    { emoji: '🥕', name: 'Carrots', benefit: 'Beta-carotene' },
+                    { emoji: '🫑', name: 'Bell Peppers', benefit: 'Vitamin C' }
+                ]
             },
             luteal: {
                 emoji: '🌺',
                 text: 'Wind Down',
-                description: 'Focus on comfort and calm'
+                description: 'Focus on comfort and calm',
+                foods: [
+                    { emoji: '🍠', name: 'Sweet Potato', benefit: 'Complex carbs' },
+                    { emoji: '🥛', name: 'Yogurt', benefit: 'Calcium' },
+                    { emoji: '🍗', name: 'Chicken', benefit: 'Lean protein' },
+                    { emoji: '🥔', name: 'Potatoes', benefit: 'Comfort food' },
+                    { emoji: '🌾', name: 'Whole Grains', benefit: 'Fiber' },
+                    { emoji: '🍯', name: 'Honey', benefit: 'Natural sweetness' }
+                ]
             }
         };
 
@@ -431,6 +463,27 @@ class PeriodTracker {
             if (text) text.textContent = mood.text;
             if (desc) desc.textContent = mood.description;
         }
+        
+        // Update food suggestions
+        this.updateFoodSuggestions(mood.foods);
+    }
+    
+    updateFoodSuggestions(foods) {
+        const foodGrid = document.getElementById('foodGrid');
+        if (!foodGrid) return;
+        
+        foodGrid.innerHTML = '';
+        
+        foods.forEach(food => {
+            const foodItem = document.createElement('div');
+            foodItem.className = 'food-item';
+            foodItem.innerHTML = `
+                <span class="food-emoji">${food.emoji}</span>
+                <span class="food-name">${food.name}</span>
+                <span class="food-benefit">${food.benefit}</span>
+            `;
+            foodGrid.appendChild(foodItem);
+        });
     }
     
     updateDailyMessage() {
