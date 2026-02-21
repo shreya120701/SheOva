@@ -13,6 +13,12 @@
             <p class="subtitle">Track your cycle, predict your next period</p>
         </header>
 
+        <div class="mood-indicator" id="moodIndicator">
+            <span class="mood-emoji">🌸</span>
+            <div class="mood-text">Welcome</div>
+            <div class="mood-description">Log your first period to get started</div>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">Current Day</span>
@@ -35,6 +41,21 @@
                 <button id="nextMonth" class="nav-btn">→</button>
             </div>
             <div class="calendar" id="calendar"></div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #ff6b9d, #ff8fab);"></div>
+                    <span>Period Days</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #ffd6e7, #ffe6f0);"></div>
+                    <span>Predicted Period</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #6bcf7f, #95e1a5);"></div>
+                    <span>Fertile Window</span>
+                </div>
+            </div>
         </div>
 
         <div class="actions">

@@ -9,8 +9,10 @@ class PeriodTracker {
     init() {
         this.renderCalendar();
         this.updateStats();
+        this.updateMoodIndicator();
         this.setupEventListeners();
         this.checkReminders();
+        this.updateBodyGradient();
     }
 
     loadData() {
@@ -176,6 +178,13 @@ class PeriodTracker {
         const daysSinceStart = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24)) + 1;
         
         currentDayEl.textContent = `Day ${daysSinceStart}`;
+        
+        const phase = this.getCurrentPhase();
+        const cards = document.querySelectorAll('.stat-card');
+        cards.forEach(card => {
+            card.className = 'stat-card';
+            card.classList.add(phase);
+        });
 
         const avgCycle = this.getAverageCycle();
         const nextPeriod = new Date(lastPeriod);
@@ -184,6 +193,78 @@ class PeriodTracker {
         
         nextPeriodEl.textContent = daysUntil > 0 ? `${daysUntil} days` : 'Soon';
         avgCycleEl.textContent = `${avgCycle} days`;
+    }
+
+    getCurrentPhase() {
+        if (this.periods.length === 0) return 'follicular';
+        
+        const lastPeriod = new Date(this.periods[this.periods.length - 1].start);
+        const today = new Date();
+        const daysSinceStart = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24)) + 1;
+        const avgCycle = this.getAverageCycle();
+        
+        if (daysSinceStart <= this.settings.periodLength) {
+            return 'menstrual';
+        } else if (daysSinceStart <= avgCycle / 2 - 3) {
+            return 'follicular';
+        } else if (daysSinceStart <= avgCycle / 2 + 3) {
+            return 'ovulation';
+        } else {
+            return 'luteal';
+        }
+    }
+
+    updateMoodIndicator() {
+        const phase = this.getCurrentPhase();
+        const moods = {
+            menstrual: {
+                emoji: '🌙',
+                text: 'Rest & Restore',
+                description: 'Take it easy, practice self-care',
+                gradient: 'linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%)'
+            },
+            follicular: {
+                emoji: '🌸',
+                text: 'Energized & Creative',
+                description: 'Great time for new projects',
+                gradient: 'linear-gradient(135deg, #ffd93d 0%, #ffe66d 100%)'
+            },
+            ovulation: {
+                emoji: '✨',
+                text: 'Peak Energy',
+                description: 'You\'re at your strongest',
+                gradient: 'linear-gradient(135deg, #6bcf7f 0%, #95e1a5 100%)'
+            },
+            luteal: {
+                emoji: '🌺',
+                text: 'Wind Down',
+                description: 'Focus on comfort and calm',
+                gradient: 'linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%)'
+            }
+        };
+
+        const mood = moods[phase];
+        const indicator = document.getElementById('moodIndicator');
+        if (indicator) {
+            indicator.style.background = mood.gradient;
+            indicator.innerHTML = `
+                <span class="mood-emoji">${mood.emoji}</span>
+                <div class="mood-text">${mood.text}</div>
+                <div class="mood-description">${mood.description}</div>
+            `;
+        }
+    }
+
+    updateBodyGradient() {
+        const phase = this.getCurrentPhase();
+        const gradients = {
+            menstrual: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)',
+            follicular: 'linear-gradient(135deg, #ffd93d 0%, #f9ca24 100%)',
+            ovulation: 'linear-gradient(135deg, #6bcf7f 0%, #38ada9 100%)',
+            luteal: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)'
+        };
+        
+        document.body.style.background = gradients[phase];
     }
 
     handleDayClick(dateStr) {
@@ -208,6 +289,8 @@ class PeriodTracker {
         this.saveData();
         this.renderCalendar();
         this.updateStats();
+        this.updateMoodIndicator();
+        this.updateBodyGradient();
     }
 
     removePeriodDay(dateStr) {
@@ -221,6 +304,8 @@ class PeriodTracker {
         this.saveData();
         this.renderCalendar();
         this.updateStats();
+        this.updateMoodIndicator();
+        this.updateBodyGradient();
     }
 
     setupEventListeners() {
@@ -311,6 +396,8 @@ class PeriodTracker {
                 this.saveData();
                 this.renderCalendar();
                 this.updateStats();
+                this.updateMoodIndicator();
+                this.updateBodyGradient();
                 this.showHistoryModal();
             });
         });
@@ -331,20 +418,6 @@ class PeriodTracker {
                 <input type="number" id="periodLength" value="${this.settings.periodLength}" min="3" max="7">
             </div>
             <button class="btn btn-primary" id="saveSettings">Save Settings</button>
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #ff6b9d;"></div>
-                    <span>Period Days</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #ffd6e7;"></div>
-                    <span>Predicted Period</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #c7f0db;"></div>
-                    <span>Fertile Window</span>
-                </div>
-            </div>
         `;
         
         modal.style.display = 'block';
@@ -355,6 +428,8 @@ class PeriodTracker {
             this.saveSettings();
             this.renderCalendar();
             this.updateStats();
+            this.updateMoodIndicator();
+            this.updateBodyGradient();
             modal.style.display = 'none';
         });
     }
