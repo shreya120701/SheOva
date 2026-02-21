@@ -18,35 +18,96 @@ class PeriodTracker {
 
     initBackground() {
         const particlesContainer = document.getElementById('particles');
-        const particleCount = 30;
+        const particleCount = 40;
+        const flowerEmojis = ['🌸', '🌺', '🌼', '🌻', '🌷', '🏵️', '💐'];
         
+        // Create particles
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particle.style.animationDelay = Math.random() * 18 + 's';
+            particle.style.animationDuration = (18 + Math.random() * 12) + 's';
             
-            const size = Math.random() * 4 + 2;
+            const size = Math.random() * 3 + 2;
             particle.style.width = size + 'px';
             particle.style.height = size + 'px';
             
             particlesContainer.appendChild(particle);
         }
         
-        // Add mouse parallax effect
+        // Create floating flowers
+        for (let i = 0; i < 8; i++) {
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            flower.textContent = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+            flower.style.left = Math.random() * 100 + '%';
+            flower.style.animationDelay = Math.random() * 20 + 's';
+            flower.style.animationDuration = (20 + Math.random() * 15) + 's';
+            flower.style.fontSize = (20 + Math.random() * 16) + 'px';
+            
+            particlesContainer.appendChild(flower);
+        }
+        
+        // Mouse parallax effect
         document.addEventListener('mousemove', (e) => {
             const shapes = document.querySelectorAll('.floating-shape');
             const mouseX = e.clientX / window.innerWidth;
             const mouseY = e.clientY / window.innerHeight;
             
             shapes.forEach((shape, index) => {
-                const speed = (index + 1) * 10;
+                const speed = (index + 1) * 15;
                 const x = (mouseX - 0.5) * speed;
                 const y = (mouseY - 0.5) * speed;
                 shape.style.transform = `translate(${x}px, ${y}px)`;
             });
         });
+        
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const savedMode = localStorage.getItem('darkMode');
+        if (savedMode === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            this.updateBodyGradient();
+        });
+        
+        // Update daily message
+        this.updateDailyMessage();
+    }
+    
+    updateDailyMessage() {
+        const messages = [
+            { icon: '✨', title: "Today's Affirmation", text: "You are strong, capable, and in tune with your body." },
+            { icon: '💫', title: "Gentle Reminder", text: "Listen to your body. Rest when you need to, move when you can." },
+            { icon: '🌟', title: "You've Got This", text: "Every cycle is a reminder of your body's incredible wisdom." },
+            { icon: '💖', title: "Self-Care Moment", text: "Be kind to yourself today. You deserve all the love you give." },
+            { icon: '🦋', title: "Daily Wisdom", text: "Your body is doing amazing things. Honor its rhythm." },
+            { icon: '🌈', title: "Positive Vibes", text: "You're exactly where you need to be in your journey." },
+            { icon: '✨', title: "Empowerment", text: "Your cycle is your superpower. Embrace every phase." },
+            { icon: '💝', title: "Compassion", text: "Treat yourself with the same care you give to others." }
+        ];
+        
+        const phase = this.getCurrentPhase();
+        const phaseMessages = {
+            menstrual: { icon: '🌙', title: "Rest Phase", text: "This is your time to slow down and recharge. Be gentle with yourself." },
+            follicular: { icon: '🌸', title: "Energy Rising", text: "Feel your energy building. Perfect time for new beginnings." },
+            ovulation: { icon: '✨', title: "Peak Power", text: "You're at your strongest. Embrace your confidence and energy." },
+            luteal: { icon: '🌺', title: "Nesting Phase", text: "Time to focus inward. Comfort and calm are your priorities." }
+        };
+        
+        const message = this.periods.length > 0 ? phaseMessages[phase] : messages[Math.floor(Math.random() * messages.length)];
+        
+        const messageEl = document.getElementById('dailyMessage');
+        if (messageEl) {
+            messageEl.querySelector('.message-icon').textContent = message.icon;
+            messageEl.querySelector('.message-title').textContent = message.title;
+            messageEl.querySelector('.message-content').textContent = message.text;
+        }
     }
 
     loadData() {
@@ -291,14 +352,25 @@ class PeriodTracker {
 
     updateBodyGradient() {
         const phase = this.getCurrentPhase();
+        const isDark = document.body.classList.contains('dark-mode');
+        
         const gradients = {
-            menstrual: 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)',
-            follicular: 'linear-gradient(135deg, #ffd93d 0%, #f9ca24 100%)',
-            ovulation: 'linear-gradient(135deg, #6bcf7f 0%, #38ada9 100%)',
-            luteal: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)'
+            menstrual: isDark 
+                ? 'linear-gradient(135deg, #2d1b3d 0%, #4a2c5a 25%, #5c3d6f 50%, #3d2647 75%, #2d1b3d 100%)'
+                : 'linear-gradient(135deg, #ffd1dc 0%, #ffb3c6 25%, #ffc4d6 50%, #ffb3c6 75%, #ffd1dc 100%)',
+            follicular: isDark
+                ? 'linear-gradient(135deg, #3d2d1b 0%, #5a4a2c 25%, #6f5c3d 50%, #473d26 75%, #3d2d1b 100%)'
+                : 'linear-gradient(135deg, #fff4d1 0%, #ffe6b3 25%, #fff0c4 50%, #ffe6b3 75%, #fff4d1 100%)',
+            ovulation: isDark
+                ? 'linear-gradient(135deg, #1b3d2d 0%, #2c5a4a 25%, #3d6f5c 50%, #26473d 75%, #1b3d2d 100%)'
+                : 'linear-gradient(135deg, #d1ffd4 0%, #b3ffc6 25%, #c4ffe0 50%, #b3ffc6 75%, #d1ffd4 100%)',
+            luteal: isDark
+                ? 'linear-gradient(135deg, #2d1b3d 0%, #4a2c5a 25%, #5c3d6f 50%, #3d2647 75%, #2d1b3d 100%)'
+                : 'linear-gradient(135deg, #e0d1ff 0%, #d0b3ff 25%, #e0c4ff 50%, #d0b3ff 75%, #e0d1ff 100%)'
         };
         
         document.body.style.background = gradients[phase];
+        document.body.style.backgroundSize = '400% 400%';
     }
 
     handleDayClick(dateStr) {
