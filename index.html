@@ -3,150 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SheOva - Immersive Cycle Journey</title>
+    <title>SheOva - Understand Your Cycle</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- 3D Canvas -->
+    <!-- 3D Canvas Background -->
     <canvas id="webgl-canvas"></canvas>
     
-    <!-- Scroll Progress Indicator -->
-    <div class="scroll-progress" id="scrollProgress"></div>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="logo">SheOva</div>
+            <button class="theme-toggle" id="themeToggle">
+                <span class="theme-icon">☀️</span>
+            </button>
+        </div>
+    </nav>
     
-    <!-- Content Sections -->
-    <div class="scroll-container">
-        
-        <!-- Section 1: Hero -->
-        <section class="section hero-section" data-section="0">
-            <div class="glass-card hero-card">
-                <div class="header-content">
-                    <h1 class="title-3d">SheOva</h1>
-                    <p class="subtitle-glow">Your Immersive Cycle Universe</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Understand Your Cycle.<br>
+                Own Your Rhythm.
+            </h1>
+            <p class="hero-subtitle">
+                A smarter, more intuitive way to track your body.
+            </p>
+            <button class="cta-primary" id="startJourney">
+                Start Your Journey
+            </button>
+        </div>
+        <div class="hero-visual">
+            <div class="phone-mockup"></div>
+                <div class="cycle-preview">
+                    <svg class="cycle-ring" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff6ec7;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ffa8d5;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring-bg" cx="100" cy="100" r="80" />
+                        <circle class="ring-progress" cx="100" cy="100" r="80" id="heroRing" />
+                        <text x="100" y="95" class="ring-day" id="heroDay">Day 14</text>
+                        <text x="100" y="115" class="ring-phase" id="heroPhase">Ovulation</text>
+                    </svg>
                 </div>
-                <button class="dark-mode-toggle-3d" id="darkModeToggle">
-                    <span class="toggle-icon">☀️</span>
-                </button>
             </div>
-            
-            <div class="glass-card message-card">
-                <div class="message-icon-3d" id="messageIcon">✨</div>
-                <div class="message-content">
-                    <div class="message-title">Today's Affirmation</div>
-                    <div class="message-text" id="messageText">You are strong, capable, and in tune with your body.</div>
-                </div>
-            </div>
-            
-            <div class="glass-card cycle-card">
-                <h2 class="section-title">Your Cycle Journey</h2>
-                
-                <div class="cycle-ring-container">
-                    <div class="cycle-ring-3d" id="cycleRing">
-                        <div class="ring-center">
-                            <div class="ring-day" id="ringDay">Day 1</div>
-                            <div class="ring-phase" id="ringPhase">Menstrual</div>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll to explore</span>
+            <div class="scroll-arrow">↓</div>
+        </div>
+    </section>
+    
+    <!-- Dashboard Section -->
+    <section class="section dashboard-section">
+        <div class="section-content">
+            <h2 class="section-title">Your cycle.<br>Beautifully visualized.</h2>
+            <div class="dashboard-visual">
+                <div class="glass-container">
+                    <div class="cycle-display">
+                        <svg class="main-cycle-ring" viewBox="0 0 300 300">
+                            <defs>
+                                <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ff6ec7;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#c8a2e0;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ffa8d5;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="main-ring-bg" cx="150" cy="150" r="120" />
+                            <circle class="main-ring-progress" cx="150" cy="150" r="120" id="mainRing" />
+                            <text x="150" y="140" class="main-ring-day" id="mainDay">Day 1</text>
+                            <text x="150" y="170" class="main-ring-phase" id="mainPhase">Menstrual</text>
+                        </svg>
+                    </div>
+                    <div class="stats-minimal">
+                        <div class="stat-item">
+                            <span class="stat-label">Current Day</span>
+                            <span class="stat-value" id="currentDay">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Next Period</span>
+                            <span class="stat-value" id="nextPeriod">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Cycle Length</span>
+                            <span class="stat-value" id="avgCycle">-</span>
                         </div>
                     </div>
                 </div>
-                
-                <div class="stats-3d">
-                    <div class="stat-orb">
-                        <div class="stat-label">Current Day</div>
-                        <div class="stat-value" id="currentDay">-</div>
-                    </div>
-                    <div class="stat-orb">
-                        <div class="stat-label">Next Period</div>
-                        <div class="stat-value" id="nextPeriod">-</div>
-                    </div>
-                    <div class="stat-orb">
-                        <div class="stat-label">Avg Cycle</div>
-                        <div class="stat-value" id="avgCycle">-</div>
-                    </div>
-                </div>
-                
-                <div class="mood-3d" id="moodIndicator">
-                    <div class="mood-emoji-3d">🌸</div>
-                    <div class="mood-text">Welcome</div>
-                    <div class="mood-desc">Log your first period to begin</div>
-                </div>
             </div>
-            
-            <div class="glass-card food-card" id="foodSuggestions">
-                <h3 class="card-title">🍽️ Nourish Your Body</h3>
-                <div class="food-grid" id="foodGrid">
-                    <div class="food-item">
-                        <span class="food-emoji">🥗</span>
-                        <span class="food-name">Leafy Greens</span>
+        </div>
+    </section>
+    
+    <!-- Insights Section -->
+    <section class="section insights-section">
+        <div class="section-content split-layout">
+            <div class="split-text">
+                <h2 class="section-title">Powered by intelligence.<br>Designed for intuition.</h2>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">
+                            <h3>Cycle Phase Prediction</h3>
+                            <p>Know what's coming before it arrives</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Section 2: Calendar -->
-        <section class="section calendar-section" data-section="1">
-            <div class="glass-card calendar-card">
-                <h2 class="section-title">Holographic Calendar</h2>
-                
-                <div class="calendar-controls">
-                    <button class="nav-orb" id="prevMonth">←</button>
-                    <h3 class="month-title" id="monthYear"></h3>
-                    <button class="nav-orb" id="nextMonth">→</button>
-                </div>
-                
-                <div class="calendar-hologram" id="calendar"></div>
-                
-                <div class="legend-3d">
-                    <div class="legend-item">
-                        <div class="legend-orb period-orb"></div>
-                        <span>Period</span>
+                    <div class="feature-item">
+                        <div class="feature-icon">💭</div>
+                        <div class="feature-text">
+                            <h3>Mood Tracking</h3>
+                            <p>Understand your emotional patterns</p>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-orb predicted-orb"></div>
-                        <span>Predicted</span>
+                    <div class="feature-item">
+                        <div class="feature-icon">🍎</div>
+                        <div class="feature-text">
+                            <h3>Nutrition Suggestions</h3>
+                            <p>Eat what your body needs, when it needs it</p>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-orb fertile-orb"></div>
-                        <span>Fertile</span>
+                    <div class="feature-item">
+                        <div class="feature-icon">✨</div>
+                        <div class="feature-text">
+                            <h3>Hormone-Aware Insights</h3>
+                            <p>Personalized guidance for every phase</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
-        
-        <!-- Section 4: Actions -->
-        <section class="section actions-section" data-section="3">
-            <div class="glass-card actions-card">
-                <h2 class="section-title">Manage Your Journey</h2>
-                
-                <div class="action-orbs">
-                    <button class="action-orb primary-orb" id="logPeriodBtn">
-                        <span class="orb-icon">+</span>
-                        <span class="orb-text">Log Period</span>
-                    </button>
-                    <button class="action-orb secondary-orb" id="viewHistoryBtn">
-                        <span class="orb-icon">📊</span>
-                        <span class="orb-text">History</span>
-                    </button>
-                    <button class="action-orb secondary-orb" id="settingsBtn">
-                        <span class="orb-icon">⚙️</span>
-                        <span class="orb-text">Settings</span>
-                    </button>
+            <div class="split-visual">
+                <div class="calendar-preview">
+                    <div class="calendar-mini" id="calendarMini"></div>
                 </div>
             </div>
-        </section>
-        
-    </div>
+        </div>
+    </section>
+    
+    <!-- Wellness Section -->
+    <section class="section wellness-section">
+        <div class="section-content centered">
+            <h2 class="section-title">More than tracking.<br>It's understanding.</h2>
+            <div class="wellness-card">
+                <div class="affirmation-display" id="affirmationDisplay">
+                    <div class="affirmation-icon">✨</div>
+                    <p class="affirmation-text">You are strong, capable, and in tune with your body.</p>
+                </div>
+                <div class="mood-display" id="moodDisplay">
+                    <div class="mood-icon">🌸</div>
+                    <h3 class="mood-title">Energized & Creative</h3>
+                    <p class="mood-desc">Great time for new projects</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Nutrition Section -->
+    <section class="section nutrition-section">
+        <div class="section-content">
+            <h2 class="section-title">Nourish & Balance</h2>
+            <p class="section-subtitle">Foods that support your current phase</p>
+            <div class="food-cards" id="foodCards">
+                <div class="food-card">
+                    <div class="food-image">🍠</div>
+                    <h3 class="food-name">Sweet Potato</h3>
+                    <p class="food-benefit">Complex carbs</p>
+                </div>
+                <div class="food-card">
+                    <div class="food-image">🥛</div>
+                    <h3 class="food-name">Yogurt</h3>
+                    <p class="food-benefit">Calcium</p>
+                </div>
+                <div class="food-card">
+                    <div class="food-image">🍗</div>
+                    <h3 class="food-name">Chicken</h3>
+                    <p class="food-benefit">Lean protein</p>
+                </div>
+                <div class="food-card">
+                    <div class="food-image">🥔</div>
+                    <h3 class="food-name">Potatoes</h3>
+                    <p class="food-benefit">Comfort food</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="section cta-section">
+        <div class="section-content centered">
+            <h2 class="section-title">Begin your journey</h2>
+            <p class="section-subtitle">Track smarter. Live better.</p>
+            <button class="cta-primary" id="getStarted">Get Started</button>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Made with care for your wellbeing</p>
+    </footer>
     
     <!-- Modal -->
-    <div id="modal" class="modal-3d">
-        <div class="modal-glass">
+    <div id="modal" class="modal">
+        <div class="modal-content">
             <button class="modal-close" id="modalClose">×</button>
             <div id="modalBody"></div>
         </div>
-    </div>
-    
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-orb"></div>
-        <p>Entering your wellness universe...</p>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
